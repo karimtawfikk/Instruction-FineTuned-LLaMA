@@ -7,13 +7,12 @@ st.title("🦙 Chat with Fine-Tuned LLaMA")
  
 model_checkpoint="Karimtawfik/llama-merged-quantized"
 device = "cuda" if torch.cuda.is_available() else "cpu"
-#model_checkpoint="./llama-merged-quantized"
 
 @st.cache_resource 
 def load_model(): 
     model = AutoModelForCausalLM.from_pretrained( 
         model_checkpoint,
-        device_map=None,  # <-- explicitly disable
+        device_map=None,
         low_cpu_mem_usage=False 
         ).to(device) 
  
@@ -27,12 +26,10 @@ model, tokenizer = load_model()
 if "chat_history" not in st.session_state: 
     st.session_state.chat_history = [] 
 
-# Save new user message into session state 
 user_instruction = st.chat_input("Ask a question...") 
 if user_instruction: 
     st.session_state.chat_history.append({"role": "user", "content": user_instruction}) 
  
-# Render entire conversation in order 
 for msg in st.session_state.chat_history: 
     with st.chat_message(msg["role"]): 
         st.markdown(msg["content"]) 
@@ -50,8 +47,8 @@ if user_instruction:  # Check if there's a new user message
                 output_ids = model.generate( 
                     **tokens, 
                     max_new_tokens=250, 
-                    do_sample=True, #allow sampling(not greedy search)
-                    top_p=0.9, #do random sampling from the top words that their cum is>0.9
+                    do_sample=True, 
+                    top_p=0.9, 
                     temperature=0.7 
                 ) 
             decoded = tokenizer.decode(output_ids[0], skip_special_tokens=True) 
@@ -63,7 +60,5 @@ if user_instruction:  # Check if there's a new user message
             if len(response.split("\n")[-1].split()) <= 2: 
                 response = "\n".join(response.split("\n")[:-1]).strip() 
  
-        # Display the response immediately
         message_placeholder.markdown(response)
-        # Add to chat history for persistence
         st.session_state.chat_history.append({"role": "assistant", "content": response})
