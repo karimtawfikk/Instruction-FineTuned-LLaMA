@@ -6,14 +6,13 @@ st.set_page_config(page_title="LLaMA Chat", layout="centered")
 st.title("🦙 Chat with Fine-Tuned LLaMA") 
  
 model_checkpoint="Karimtawfik/llama-merged-quantized"
- 
+device = "cuda" if torch.cuda.is_available() else "cpu"
 #model_checkpoint="./llama-merged-quantized"
 
 @st.cache_resource 
 def load_model(): 
     model = AutoModelForCausalLM.from_pretrained( 
-        model_checkpoint, 
-        device_map="auto") 
+        model_checkpoint).to(device) 
     tokenizer = AutoTokenizer.from_pretrained( 
         model_checkpoint) 
     tokenizer.pad_token = tokenizer.eos_token 
@@ -42,7 +41,7 @@ if user_instruction:  # Check if there's a new user message
             prompt = f"""### Instruction:\n{user_instruction}\n\n### Input:\n\n### Response:""" 
             #prompt = f"User: {user_instruction}\nAssistant:" 
     
-            tokens = tokenizer(prompt, return_tensors="pt").to(model.device) 
+            tokens = tokenizer(prompt, return_tensors="pt").to(device) 
             with torch.no_grad(): 
                 output_ids = model.generate( 
                     **tokens, 
