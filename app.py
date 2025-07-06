@@ -1,21 +1,21 @@
 import streamlit as st 
 from transformers import AutoModelForCausalLM, AutoTokenizer 
 import torch 
- 
+
 st.set_page_config(page_title="LLaMA Chat", layout="centered") 
 st.title("🦙 Chat with Fine-Tuned LLaMA") 
  
+model_checkpoint="Karimtawfik/llama-merged-quantized"
+ 
+#model_checkpoint="./llama-merged-quantized"
+
 @st.cache_resource 
 def load_model(): 
     model = AutoModelForCausalLM.from_pretrained( 
-        "./llama-merged-quantized", 
-        device_map="cuda", 
-        local_files_only=True 
-    ) 
+        model_checkpoint, 
+        device_map="auto") 
     tokenizer = AutoTokenizer.from_pretrained( 
-        "./llama-merged-quantized", 
-        local_files_only=True 
-    ) 
+        model_checkpoint) 
     tokenizer.pad_token = tokenizer.eos_token 
     return model.eval(), tokenizer 
  
@@ -23,7 +23,7 @@ model, tokenizer = load_model()
  
 if "chat_history" not in st.session_state: 
     st.session_state.chat_history = [] 
- 
+
 # Save new user message into session state 
 user_instruction = st.chat_input("Ask a question...") 
 if user_instruction: 
@@ -42,13 +42,13 @@ if user_instruction:  # Check if there's a new user message
             prompt = f"""### Instruction:\n{user_instruction}\n\n### Input:\n\n### Response:""" 
             #prompt = f"User: {user_instruction}\nAssistant:" 
     
-            tokens = tokenizer(prompt, return_tensors="pt").to("cuda") 
+            tokens = tokenizer(prompt, return_tensors="pt").to(model.device) 
             with torch.no_grad(): 
                 output_ids = model.generate( 
                     **tokens, 
                     max_new_tokens=250, 
-                    do_sample=True, 
-                    top_p=0.9, 
+                    do_sample=True, #allow sampling(not greedy search)
+                    top_p=0.9, #do random sampling from the top words that their cum is>0.9
                     temperature=0.7 
                 ) 
             decoded = tokenizer.decode(output_ids[0], skip_special_tokens=True) 
