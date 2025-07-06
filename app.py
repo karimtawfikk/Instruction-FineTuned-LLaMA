@@ -34,8 +34,7 @@ for msg in st.session_state.chat_history:
     with st.chat_message(msg["role"]): 
         st.markdown(msg["content"]) 
  
-# If a message was just added, now generate LLM response 
-if user_instruction:  # Check if there's a new user message
+if user_instruction:  
     with st.chat_message("assistant"): 
         message_placeholder = st.empty()
         with st.spinner("Thinking..."): 
