@@ -12,7 +12,11 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 @st.cache_resource 
 def load_model(): 
     model = AutoModelForCausalLM.from_pretrained( 
-        model_checkpoint).to(device) 
+        model_checkpoint,
+        device_map=None,  # <-- explicitly disable
+        low_cpu_mem_usage=False 
+        ).to(device) 
+ 
     tokenizer = AutoTokenizer.from_pretrained( 
         model_checkpoint) 
     tokenizer.pad_token = tokenizer.eos_token 
