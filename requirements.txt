@@ -1,9 +1,7 @@
 streamlit>=1.34.0
-transformers>=4.41.2
-torch>=2.2.0
-accelerate>=0.27.0
-langchain==0.2.1
+transformers==4.41.2
+torch==2.2.2
+accelerate==0.30.1
 safetensors>=0.4.3
-accelerate>=0.27.0
 sentencepiece
-bitsandbytes  # Only if your model was quantized
+bitsandbytes  # if needed for your quantized model
